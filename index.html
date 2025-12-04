@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexaBot Voice Studio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            /* Color Palette sesuai Veo 3 Nexa */
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-card: rgba(20, 20, 30, 0.6);
+            --text-primary: #ffffff;
+            --text-secondary: #94a3b8;
+            --accent-red: #DC143C;
+            --gradient-primary: linear-gradient(135deg, #DC143C 0%, #8B0000 100%);
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --radius-md: 0.75rem;
+            --radius-lg: 1rem;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        /* Background Mesh Effect */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, rgba(139, 0, 0, 0.05) 0%, rgba(0, 0, 0, 0.1) 100%);
+            z-index: -1;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px; /* Fokus tampilan seperti mobile/screenshot */
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        
+        .logo {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* Card Styling */
+        .card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Input Groups */
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 8px;
+        }
+
+        input[type="text"], 
+        textarea, 
+        select {
+            width: 100%;
+            background: var(--glass-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 12px 16px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            border-color: var(--accent-red);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        /* API Key Input (Kecil di atas) */
+        #api-key-input {
+            font-size: 0.8rem;
+            padding: 8px;
+            margin-bottom: 20px;
+            border-color: rgba(220, 20, 60, 0.3);
+        }
+
+        /* Range Slider */
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 4px;
+            background: var(--glass-bg);
+            border-radius: 2px;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            background: var(--accent-red);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(220, 20, 60, 0.5);
+        }
+
+        .range-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 8px;
+        }
+
+        #temperature-value {
+            color: var(--accent-red);
+            font-weight: bold;
+        }
+
+        /* Generate Button */
+        .btn-generate {
+            width: 100%;
+            padding: 16px;
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 0.9rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-generate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(220, 20, 60, 0.4);
+        }
+
+        .btn-generate:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Results Area */
+        .results-area {
+            margin-top: 20px;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .result-title {
+            color: var(--accent-red);
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .placeholder {
+            border: 2px dashed var(--border-color);
+            border-radius: var(--radius-lg);
+            height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        /* Audio Player Styling */
+        audio {
+            width: 100%;
+            height: 40px;
+            border-radius: var(--radius-md);
+            margin-top: 10px;
+        }
+
+        .loading-spinner {
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top: 3px solid var(--accent-red);
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            display: none;
+            margin: 0 auto;
+        }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .download-btn {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 8px;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+        }
+        .download-btn:hover {
+            border-color: var(--accent-red);
+            color: white;
+        }
+
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <div class="logo">Veo 3 Latest Nexa</div>
+        </header>
+
+        <input type="password" id="api-key-input" placeholder="Paste your Gemini API Key here to start..." />
+
+        <div class="card">
+            <div class="input-group">
+                <label>Generation Mode</label>
+                <select disabled style="opacity: 0.7;">
+                    <option>Voice Generator</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label>Script Text</label>
+                <textarea id="voice-script" placeholder="Say cheerfully: Have a wonderful day!" rows="4"></textarea>
+                <p style="font-size: 11px; color: var(--text-secondary); margin-top: 5px;">Use natural language to control style, tone, and emotion.</p>
+            </div>
+
+            <div class="input-group">
+                <label>Voice Character</label>
+                <select id="voice-select">
+                    <optgroup label="Bright & Upbeat">
+                        <option value="Zephyr">Zephyr - Bright</option>
+                        <option value="Puck">Puck - Upbeat</option>
+                        <option value="Autonoe">Autonoe - Bright</option>
+                    </optgroup>
+                    <optgroup label="Firm & Strong">
+                        <option value="Kore">Kore - Firm</option>
+                        <option value="Orus">Orus - Firm</option>
+                    </optgroup>
+                    <optgroup label="Smooth & Clear">
+                        <option value="Aoede" selected>Aoede - Breezy</option>
+                        <option value="Erinome">Erinome - Clear</option>
+                        <option value="Fenrir">Fenrir - Excitable</option>
+                    </optgroup>
+                    </select>
+            </div>
+
+            <div class="input-group">
+                <label>Speech Variation (Temperature)</label>
+                <input type="range" id="voice-temperature" min="0" max="2" step="0.1" value="1.0">
+                <div class="range-labels">
+                    <span>Consistent (0)</span>
+                    <span id="temperature-value">1.0</span>
+                    <span>Varied (2)</span>
+                </div>
+            </div>
+
+            <button id="generate-btn" class="btn-generate">
+                <div class="loading-spinner" id="spinner"></div>
+                <span id="btn-text">Generate Voice</span>
+            </button>
+        </div>
+
+        <div class="card">
+            <div class="result-title">Generated Content</div>
+            <div id="results-container">
+                <div class="placeholder" id="placeholder">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                    <p>Your generated content will appear here.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Logic Helper Functions (WAV Header creation) ---
+        // Diambil langsung dari kode index.tsx Anda untuk memastikan audio bisa diputar di browser
+        function createWavHeader(sampleRate, numChannels, bitsPerSample, dataSize) {
+            const buffer = new ArrayBuffer(44);
+            const view = new DataView(buffer);
+            const writeString = (offset, string) => {
+                for (let i = 0; i < string.length; i++) view.setUint8(offset + i, string.charCodeAt(i));
+            };
+            
+            writeString(0, 'RIFF'); 
+            view.setUint32(4, 36 + dataSize, true); 
+            writeString(8, 'WAVE'); 
+            writeString(12, 'fmt '); 
+            view.setUint32(16, 16, true); 
+            view.setUint16(20, 1, true); 
+            view.setUint16(22, numChannels, true); 
+            view.setUint32(24, sampleRate, true); 
+            view.setUint32(28, sampleRate * numChannels * bitsPerSample / 8, true); 
+            view.setUint16(32, numChannels * bitsPerSample / 8, true); 
+            view.setUint16(34, bitsPerSample, true); 
+            writeString(36, 'data'); 
+            view.setUint32(40, dataSize, true); 
+            return buffer;
+        }
+
+        function pcmToWav(base64PCM) {
+            const binaryString = atob(base64PCM);
+            const pcmData = new Uint8Array(binaryString.length);
+            for (let i = 0; i < binaryString.length; i++) pcmData[i] = binaryString.charCodeAt(i);
+            
+            // Gemini API Standard: 24kHz, 1 channel, 16-bit
+            const header = createWavHeader(24000, 1, 16, pcmData.length);
+            const wavData = new Uint8Array(header.byteLength + pcmData.length);
+            wavData.set(new Uint8Array(header), 0);
+            wavData.set(pcmData, header.byteLength);
+            
+            return new Blob([wavData], { type: 'audio/wav' });
+        }
+
+        // --- Main Application Logic ---
+        const generateBtn = document.getElementById('generate-btn');
+        const spinner = document.getElementById('spinner');
+        const btnText = document.getElementById('btn-text');
+        const resultsContainer = document.getElementById('results-container');
+        const placeholder = document.getElementById('placeholder');
+        const tempSlider = document.getElementById('voice-temperature');
+        const tempValue = document.getElementById('temperature-value');
+
+        // Update Slider UI
+        tempSlider.addEventListener('input', (e) => tempValue.textContent = e.target.value);
+
+        generateBtn.addEventListener('click', async () => {
+            const apiKey = document.getElementById('api-key-input').value.trim();
+            const text = document.getElementById('voice-script').value.trim();
+            const voice = document.getElementById('voice-select').value;
+            const temperature = parseFloat(tempSlider.value);
+
+            if (!apiKey) {
+                alert("Please enter your Gemini API Key first!");
+                return;
+            }
+            if (!text) {
+                alert("Please enter a script text.");
+                return;
+            }
+
+            // UI Loading State
+            generateBtn.disabled = true;
+            spinner.style.display = 'block';
+            btnText.textContent = 'Generating...';
+
+            try {
+                // Konfigurasi Request ke Google Gemini API
+                const MODEL_ID = 'gemini-2.5-flash-preview-tts'; // Model terbaru sesuai source code
+                const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_ID}:generateContent?key=${apiKey}`;
+                
+                const requestBody = {
+                    contents: [{ parts: [{ text: text }] }],
+                    generationConfig: {
+                        responseModalities: ["AUDIO"],
+                        temperature: temperature,
+                        speechConfig: {
+                            voiceConfig: {
+                                prebuiltVoiceConfig: {
+                                    voiceName: voice
+                                }
+                            }
+                        }
+                    }
+                };
+
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestBody)
+                });
+
+                if (!response.ok) throw new Error("API Error: " + response.statusText);
+
+                const data = await response.json();
+                const audioContent = data.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+
+                if (audioContent) {
+                    // Convert raw audio to WAV blob
+                    const wavBlob = pcmToWav(audioContent);
+                    const audioUrl = URL.createObjectURL(wavBlob);
+                    
+                    // Tampilkan Hasil
+                    placeholder.style.display = 'none';
+                    
+                    const resultItem = document.createElement('div');
+                    resultItem.style.marginBottom = "20px";
+                    resultItem.innerHTML = `
+                        <div style="background:var(--glass-bg); padding:15px; border-radius:10px; border:1px solid var(--border-color);">
+                            <div style="font-size:0.8rem; color:var(--text-secondary);">Voice: <strong>${voice}</strong></div>
+                            <audio controls src="${audioUrl}" autoplay></audio>
+                            <button class="download-btn" onclick="const a=document.createElement('a');a.href='${audioUrl}';a.download='voice.wav';a.click();">Download Audio</button>
+                        </div>
+                    `;
+                    resultsContainer.prepend(resultItem);
+                } else {
+                    alert("No audio generated. Check your quota or script.");
+                }
+
+            } catch (error) {
+                console.error(error);
+                alert("Failed to generate voice. Check console for details.");
+            } finally {
+                generateBtn.disabled = false;
+                spinner.style.display = 'none';
+                btnText.textContent = 'Generate Voice';
+            }
+        });
+    </script>
+</body>
+</html>
